@@ -1,5 +1,5 @@
 export function startServer() {
   return {
-    status: "scaffolded"
+    status: "scaffolded",
   };
 }

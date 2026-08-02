@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": [
+    "test/**/*",
+    "eslint.config.mjs",
+    "jest.config.js",
+    "**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": "./src"
+  }
+}

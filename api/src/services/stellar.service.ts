@@ -9,8 +9,8 @@ import {
   nativeToScVal,
   Address,
   scValToNative,
-} from '@stellar/stellar-sdk';
-import { config } from '../config';
+} from "@stellar/stellar-sdk";
+import { config } from "../config";
 
 const server = new rpc.Server(config.stellar.rpcUrl);
 const contract = new Contract(config.stellar.contractId);
@@ -27,25 +27,23 @@ export async function attestProofOnChain(
   publicSignals: string[],
 ): Promise<AttestResult> {
   try {
-    const verifierKeypair = Keypair.fromSecret(config.stellar.verifierSecretKey);
-    const verifierAccount = await server.getAccount(verifierKeypair.publicKey());
-
-    // Build public signals as SCVal
-    const signalsVec = nativeToScVal(
-      publicSignals.map(s => s),
-      { type: 'string' }
+    const verifierKeypair = Keypair.fromSecret(
+      config.stellar.verifierSecretKey,
+    );
+    const verifierAccount = await server.getAccount(
+      verifierKeypair.publicKey(),
     );
 
     const walletScVal = new Address(walletAddress).toScVal();
-    const proofTypeScVal = nativeToScVal(proofType, { type: 'string' });
+    const proofTypeScVal = nativeToScVal(proofType, { type: "string" });
     const publicSignalsScVal = xdr.ScVal.scvVec(
-      publicSignals.map(s => nativeToScVal(s, { type: 'string' }))
+      publicSignals.map((s) => nativeToScVal(s, { type: "string" })),
     );
 
     // Wrap in PublicSignals struct
     const publicSignalsStruct = xdr.ScVal.scvMap([
       new xdr.ScMapEntry({
-        key: xdr.ScVal.scvSymbol('signals'),
+        key: xdr.ScVal.scvSymbol("signals"),
         val: publicSignalsScVal,
       }),
     ]);
@@ -56,12 +54,12 @@ export async function attestProofOnChain(
     })
       .addOperation(
         contract.call(
-          'verify_proof',
+          "verify_proof",
           new Address(verifierKeypair.publicKey()).toScVal(),
           walletScVal,
           proofTypeScVal,
           publicSignalsStruct,
-        )
+        ),
       )
       .setTimeout(30)
       .build();
@@ -71,20 +69,20 @@ export async function attestProofOnChain(
 
     const result = await server.sendTransaction(preparedTx);
 
-    if (result.status === 'ERROR') {
-      return { success: false, error: result.errorResult?.toXDR('base64') };
+    if (result.status === "ERROR") {
+      return { success: false, error: result.errorResult?.toXDR("base64") };
     }
 
     // Poll for confirmation
     let getResult = await server.getTransaction(result.hash);
     let attempts = 0;
-    while (getResult.status === 'NOT_FOUND' && attempts < 20) {
-      await new Promise(r => setTimeout(r, 1500));
+    while (getResult.status === "NOT_FOUND" && attempts < 20) {
+      await new Promise((r) => setTimeout(r, 1500));
       getResult = await server.getTransaction(result.hash);
       attempts++;
     }
 
-    if (getResult.status === 'SUCCESS') {
+    if (getResult.status === "SUCCESS") {
       return { success: true, txHash: result.hash };
     } else {
       return { success: false, error: `tx status: ${getResult.status}` };
@@ -99,8 +97,12 @@ export async function checkVerificationOnChain(
   proofType: string,
 ): Promise<boolean> {
   try {
-    const verifierKeypair = Keypair.fromSecret(config.stellar.verifierSecretKey);
-    const verifierAccount = await server.getAccount(verifierKeypair.publicKey());
+    const verifierKeypair = Keypair.fromSecret(
+      config.stellar.verifierSecretKey,
+    );
+    const verifierAccount = await server.getAccount(
+      verifierKeypair.publicKey(),
+    );
 
     const tx = new TransactionBuilder(verifierAccount, {
       fee: BASE_FEE,
@@ -108,10 +110,10 @@ export async function checkVerificationOnChain(
     })
       .addOperation(
         contract.call(
-          'is_verified',
+          "is_verified",
           new Address(walletAddress).toScVal(),
-          nativeToScVal(proofType, { type: 'string' }),
-        )
+          nativeToScVal(proofType, { type: "string" }),
+        ),
       )
       .setTimeout(30)
       .build();
