@@ -81,6 +81,7 @@ describe("API Route Integration Tests", () => {
       const res = await request(app).post("/api/prove").send({
         proofType: "age_over_18",
         walletAddress: "INVALID_WALLET",
+        data: { birthdate: "20000101" },
       });
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty("error");
@@ -97,7 +98,7 @@ describe("API Route Integration Tests", () => {
         .send({
           proofType: "age_over_18",
           walletAddress: validWallet,
-          data: { age: 15, minAge: 18 },
+          data: { birthdate: "20100101" },
         });
 
       expect(res.status).toBe(400);
@@ -123,7 +124,7 @@ describe("API Route Integration Tests", () => {
         .send({
           proofType: "age_over_18",
           walletAddress: validWallet,
-          data: { age: 21, minAge: 18 },
+          data: { birthdate: "20000101" },
         });
 
       expect(res.status).toBe(500);
@@ -149,7 +150,7 @@ describe("API Route Integration Tests", () => {
         .send({
           proofType: "age_over_18",
           walletAddress: validWallet,
-          data: { age: 21, minAge: 18 },
+          data: { birthdate: "20000101" },
         });
 
       expect(res.status).toBe(200);
