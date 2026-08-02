@@ -77,6 +77,11 @@ router.get(
       return;
     }
 
+    if (!wallet || !wallet.startsWith("G") || wallet.length !== 56) {
+      res.status(400).json({ error: "invalid Stellar walletAddress" });
+      return;
+    }
+
     try {
       const isVerified = await checkVerificationOnChain(wallet, proofType);
       res.json({

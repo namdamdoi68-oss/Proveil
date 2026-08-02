@@ -140,13 +140,15 @@ describe("stellar service unit tests", () => {
   });
 
   describe("checkVerificationOnChain", () => {
-    test("returns false if simulated results are empty", async () => {
+    test("throws error if simulation fails", async () => {
       mockServer.simulateTransaction.mockResolvedValue({
-        results: [],
+        isSuccess: false,
+        error: "Simulation error",
       });
 
-      const res = await checkVerificationOnChain(validWallet, "age_over_18");
-      expect(res).toBe(false);
+      await expect(checkVerificationOnChain(validWallet, "age_over_18")).rejects.toThrow(
+        "RPC simulation failed: Simulation error"
+      );
     });
 
     test("returns true if verified", async () => {

@@ -122,8 +122,10 @@ export async function checkVerificationOnChain(
     if (rpc.Api.isSimulationSuccess(result)) {
       return scValToNative(result.result!.retval) as boolean;
     }
-    return false;
-  } catch {
-    return false;
+    throw new Error(
+      "RPC simulation failed: " + (result as any).error || "Unknown RPC error"
+    );
+  } catch (err: any) {
+    throw err;
   }
 }
